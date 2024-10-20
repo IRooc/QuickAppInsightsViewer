@@ -1,0 +1,84 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Logs";
+}
+<style>
+    .stats {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    .stats .filter {
+        border: 1px solid grey;
+        border-radius:1rem;
+        padding: 0 1rem;
+    }
+    .stats .filter.selected {
+        background: lightgrey;
+    }
+    .search {
+        max-width: 400px;
+        margin-bottom: 1rem;
+    }
+    .hidefilter,
+    .hidesearch {
+        display: none;
+    }
+
+    td {
+        word-break: break-word;
+    }
+
+</style>
+<div>
+    <h1>Exception and traces</h1>
+    @{
+        List<ResultCell> results = ViewData["result"] as List<ResultCell>;
+        if (results == null)
+        {
+            results = new List<ResultCell>{
+                        new ResultCell
+                        {
+                        timestamp = DateTime.MinValue,
+                        message = "Nothing found"
+                        }
+                    };
+
+        }
+    }
+    <div class="stats">
+    @foreach(var s in ViewData["summary"] as List<AppSummary>)
+    {
+        <div class="filter" data-appname="@s.Name">@s.Name  @s.Exceptions  @s.Traces</div>
+    }
+    </div>
+    <div class="search">
+        <input type="search" name="search" placeholder="Search"/> <span id="totalFound"></span>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>AppName</th>
+                <th>Type</th>
+                <th>Resource</th>
+                <th>Timestamp</th>
+                <th>Message</th>
+                <th>CustDim</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cell in results)
+            {
+                <tr style="background-color: @(cell.type == "exception" ? "linen":"lightgrey")">
+                    <td>@cell.appName</td>
+                    <td>@cell.type</td>
+                    <td>@cell.resource</td>
+                    <td>@(cell.timestamp.AddHours(2).ToString("dd/MM/yyyy HH:mm:ss"))</td>
+                    <td>@cell.message</td>
+                    <td><pre style="white-space:pre-wrap;max-height: 200px;max-width:800px;overflow:scroll;">@cell.customDimensions</pre></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
